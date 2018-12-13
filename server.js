@@ -1,14 +1,22 @@
 // Dependencies
 var express = require("express");
 var exphbs = require("express-handlebars");
+var axios = require("axios");
+var cheerio = require("cheerio");
+var databaseUrl = "scraper";
+var collections = ["scrapedData"];
+var mongojs = require("mongojs");
 
-// Create an instance of the express app.
 var app = express();
+var PORT = process.env.PORT || 8080; //PORT set by Heroku
 
-// Set the port of our application
-// process.env.PORT lets the port be set by Heroku
-var PORT = process.env.PORT || 8080;
+// =====================================================
+var db = mongojs(databaseUrl, collections);
+db.on("error", function(error) {
+  console.log("Database Error:", error);
+});
 
+// =====================================================
 // Set Handlebars as the default templating engine.
 app.engine("handlebars", exphbs({ defaultLayout: "main" }));
 app.set("view engine", "handlebars");
@@ -33,6 +41,41 @@ app.get("/articles", function(req, res) {
   res.render("news", { news: articles });
 });
 
+
+app.get("/scrape", function(req, res) {
+  // Make a request via axios for the news section of `ycombinator`
+  axios.get("https://news.ycombinator.com/").then(function(response) {
+    // Load the html body from axios into cheerio
+    var $ = cheerio.load(response.data);
+    // For each element with a "title" class
+    $(".title").each(function(i, element) {
+      // Save the text and href of each link enclosed in the current element
+      var title = $(element).children("a").text();
+      var link = $(element).children("a").attr("href");
+
+      // If this found element had both a title and a link
+      if (title && link) {
+        // Insert the data in the scrapedData db
+        db.scrapedData.insert({
+          title: title,
+          link: link
+        },
+        function(err, inserted) {
+          if (err) {
+            // Log the error if one is encountered during the query
+            console.log(err);
+          }
+          else {
+            // Otherwise, log the inserted data
+            console.log(inserted);
+          }
+        });
+      }
+    });
+  });
+
+  res.send("Scrape Complete");
+});
 // =====================================================
 
 app.listen(PORT, function() {
