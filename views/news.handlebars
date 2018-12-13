@@ -1,0 +1,43 @@
+<style>
+	.card {
+		width: 100%;
+		margin-top: 10%;
+	}
+
+	p {
+		color: blue;
+	}
+
+</style>
+
+<div class="container">
+
+	<div class="row">
+
+		{{#each news}}
+		<div class="col s5 m4">
+			<div class="card">
+				<div class="card-image">
+					<img src="../images/bart.png">
+					<span class="card-title"></span>
+				</div>
+				<div class="card-content">
+					<p>Name: {{name}}</p>
+				</div>
+				<div class="card-action">
+					<a href="#">This is a link</a>
+				</div>
+			</div>
+			<form action="/action_page.php">
+				Comment: <input type="text" name="comment"><br>
+				<input type="submit" value="Submit">
+			</form>
+
+		</div>
+		
+		{{/each}}
+
+	</div>
+
+
+</div>
