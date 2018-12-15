@@ -3,78 +3,73 @@ var express = require("express");
 var exphbs = require("express-handlebars");
 var axios = require("axios");
 var cheerio = require("cheerio");
-var databaseUrl = "scraper";
-var collections = ["scrapedData"];
-var mongojs = require("mongojs");
-
+var logger = require("morgan");
+var mongoose = require("mongoose");
+var db = require("./models");
 var app = express();
 var PORT = process.env.PORT || 8080; //PORT set by Heroku
 
-// =====================================================
-var db = mongojs(databaseUrl, collections);
-db.on("error", function(error) {
-  console.log("Database Error:", error);
-});
-
-// =====================================================
-// Set Handlebars as the default templating engine.
 app.engine("handlebars", exphbs({ defaultLayout: "main" }));
 app.set("view engine", "handlebars");
 
-// Data
-var articles = [
-  { name: "article 1"},
-  { name: "article 2"},
-  { name: "article 3"}
-];
+// =====================================================
 
-// Routes
-app.get("/articles/:name", function(req, res) {
-  for (var i = 0; i < articles.length; i++) {
-    if (articles[i].name === req.params.name) {
-      return res.render("article", articles[i]);
-    }
-  }
+// Use morgan logger for logging requests
+app.use(logger("dev"));
+// Parse request body as JSON
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+// app.use(express.static("public")); //make public folder static
+
+// =====================================================
+
+// Connect to the Mongo DB
+var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines";
+mongoose.connect(MONGODB_URI);
+
+// =====================================================
+
+// A GET route for scraping the echoJS website
+app.get("/scrape", function(req, res) {
+  axios.get("http://www.echojs.com/").then(function(response) {
+    var $ = cheerio.load(response.data);
+
+    $("article h2").each(function(i, element) {
+      var result = {}; //created empty object
+
+      //saving as properties for result object
+      result.title = $(this)
+        .children("a")
+        .text();
+      result.link = $(this)
+        .children("a")
+        .attr("href");
+
+      // Create a new Article using the `result` object built from scraping
+      db.Article.create(result)
+        .then(function(dbArticle) {
+          console.log(dbArticle);
+        })
+        .catch(function(err) {
+          console.log(err);
+        });
+    });
+    res.send("Scrape Complete");
+  });
 });
+
+// =====================================================
 
 app.get("/articles", function(req, res) {
-  res.render("news", { news: articles });
-});
+  // Grab every document in the Articles collection
 
-
-app.get("/scrape", function(req, res) {
-  // Make a request via axios for the news section of `ycombinator`
-  axios.get("https://news.ycombinator.com/").then(function(response) {
-    // Load the html body from axios into cheerio
-    var $ = cheerio.load(response.data);
-    // For each element with a "title" class
-    $(".title").each(function(i, element) {
-      // Save the text and href of each link enclosed in the current element
-      var title = $(element).children("a").text();
-      var link = $(element).children("a").attr("href");
-
-      // If this found element had both a title and a link
-      if (title && link) {
-        // Insert the data in the scrapedData db
-        db.scrapedData.insert({
-          title: title,
-          link: link
-        },
-        function(err, inserted) {
-          if (err) {
-            // Log the error if one is encountered during the query
-            console.log(err);
-          }
-          else {
-            // Otherwise, log the inserted data
-            console.log(inserted);
-          }
-        });
-      }
+  db.Article.find({})
+    .then(function(dbArticle) {
+      res.render("news", { news: dbArticle });
+    })
+    .catch(function(err) {
+      res.json(err);
     });
-  });
-
-  res.send("Scrape Complete");
 });
 // =====================================================
 
