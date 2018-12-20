@@ -19,13 +19,17 @@ app.use(logger("dev"));
 // Parse request body as JSON
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-// app.use(express.static("public")); //make public folder static
+// app.use("public", express.static(__dirname + "/public/app"));
 
 // =====================================================
 
 // Connect to the Mongo DB
-var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines";
-mongoose.connect(MONGODB_URI);
+var MONGODB_URI =
+  process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines";
+mongoose.connect(
+  MONGODB_URI,
+  { useNewUrlParser: true }
+);
 
 // =====================================================
 
@@ -48,7 +52,7 @@ app.get("/scrape", function(req, res) {
       // Create a new Article using the `result` object built from scraping
       db.Article.create(result)
         .then(function(dbArticle) {
-          console.log(dbArticle);
+          // console.log(dbArticle);
         })
         .catch(function(err) {
           console.log(err);
@@ -65,12 +69,54 @@ app.get("/articles", function(req, res) {
 
   db.Article.find({})
     .then(function(dbArticle) {
+      console.log(dbArticle);
       res.render("news", { news: dbArticle });
     })
     .catch(function(err) {
       res.json(err);
     });
 });
+
+// =====================================================
+
+app.get("/articles/:id", function(req, res) {
+  // Using the id passed in the id parameter, prepare a query that finds the matching one in our db...
+  db.Article.findOne({ _id: req.params.id })
+    // ..and populate all of the notes associated with it
+    .populate("note")
+    .then(function(dbArticle) {
+      res.json(dbArticle);
+    })
+    .catch(function(err) {
+      res.json(err);
+    });
+});
+
+// =====================================================
+app.get("/notes", function(req, res) {
+	db.Article.find({})
+		.populate("notes")
+		.then(function(dbArticle){
+			res.json(dbArticle);
+		})
+		.catch(function(err){
+			res.json(err);
+		})
+})
+
+app.post("/notes", function(req, res) {
+	db.Note.create(req.body)
+		.then(function(dbNote) {
+			return db.Article.findOneAndUpdate({}, { $push: {notes: dbNote._id } }, { new: true });
+		})
+    .then(function(dbArticle) {
+      res.json(dbArticle);
+    })
+    .catch(function(err) {
+      res.json(err);
+    });
+});
+
 // =====================================================
 
 app.listen(PORT, function() {
