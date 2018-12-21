@@ -3,142 +3,90 @@
 		margin-top: 0;
 	}
 
+	a {
+		color: white;
+	}
+
+	p {
+		margin: auto;
+	}
+
+	img {
+		width: 100%;
+	}
+
 	.header {
 		height: 100px;
 		width: 100%;
-		background-color:lightgrey;
+		background-color: lightgrey;
 		padding: 15px;
 		text-align: center;
 		margin-bottom: 2%;
 	}
 
 	.articleBox {
-		width: 500px;
+		width: 100%;
 		text-align: center;
+		margin: 0 auto;
 	}
-	.commentBox {
-		width: 500px;
-		margin-left: 2%;
-		text-align: center;	
-		overflow: auto;
 
-	}
 
 	.articleList {
+		width: 85%;
 		height: 400px;
 		padding: 15px;
 		border: 2px solid black;
+		background-color: grey;
 		display: inline-block;
 		overflow: auto;
 		text-align: left;
 	}
 
-	.rowSetup {
-		display: inline-flex;
-		padding: 15px;
-		margin: 0 auto;
+	.card-panel {
+		height: 45px;
+		padding: 10px;
+		margin: 0;
 	}
 
-	#form {
-		height: 400px;
-		padding: 15px;
-		border: 2px solid black;
-		overflow: auto;
+	.nav-wrapper {
+		background-color: black;
 	}
-
 </style>
 
-<div class="header">
-	<h1>News Scrape</h1>
-</div>
+<div class="articleBox">
 
-<div class="container">
-
-	<div class="rowSetup">
-
-		<div class="articleBox">
-			<h4>Article List</h4>
-			<div class="articleList">
-				{{#each news}}
-				<p data-id="{{id}}"><strong>[ {{id}} ] </strong> {{title}}</p>
-				{{/each}}
+	<div class="articleList">
+		{{#each news}}
+		<div class="scrapedArticles">
+			<div class="row">
+				<div class="col s12 m12">
+					<div class="card-panel teal">
+						<span class="white-text">
+							{{title}}
+							<a><i id="add" action="/add" method="post" data-id="{{id}}" class="material-icons new badge right green">check</i></a>
+						</span>
+					</div>
+				</div>
 			</div>
 		</div>
-
-
-		<div class="commentBox">
-			<h4>Add a comment</h4>
-			<form id="form">
-				<div id="notes"></div>
-			</form>
-		</div>
+		{{/each}}
 	</div>
 
 </div>
 
-
 <script>
-	$.getJSON("/articles", function (data) {
-		// For each one
-		for (var i = 0; i < data.length; i++) {
-			// Display the apropos information on the page
-			$("#articles").append(
-				"<p data-id='" +
-				data[i]._id +
-				"'>" +
-				data[i].title +
-				"<br />" +
-				data[i].link +
-				"</p>"
-			);
-		}
-	});
-
-
-	$(document).on("click", "p", function () {
-		// Empty the notes from the note section
-		$("#notes").empty();
+	$(document).on("click", "#add", function () {
+		alert("Added to Article list!");
 		var thisId = $(this).attr("data-id");
-
-		$.ajax({
-			method: "GET",
-			url: "/articles/" + thisId
-		}).then(function (data) {
-			console.log(data);
-			$("#notes").append("<h5>" + data.title + "</h5>");
-			$("#notes").append("<input id='titleinput>");
-			$("#notes").append("<textarea id='bodyinput'></textarea>");
-			$("#notes").append("<button data-id='" + data._id + "' id='submit'>Add Comment</button>");
-
-			// If there's a note in the article
-			if (data.note) {
-				// Place the title of the note in the title input
-				$("#titleinput").val(data.note.title);
-				// Place the body of the note in the body textarea
-				$("#bodyinput").val(data.note.body);
-			}
-		});
-	});
-
-	$(document).on("click", "#submit", function () {
-		var thisId = $(this).attr("data-id");
+		console.log("This Id: ", thisId);
 		$.ajax({
 			method: "POST",
 			url: "/articles/" + thisId,
-			data: {
-				// Value taken from title input
-				title: $("#titleinput").val(),
-				// Value taken from note textarea
-				body: $("#bodyinput").val()
-			}
 		})
-			// With that done
 			.then(function (data) {
-				// Log the response
 				console.log(data);
-				// Empty the notes section
-				$("#notes").empty();
 			});
 	});
+
 
 </script>

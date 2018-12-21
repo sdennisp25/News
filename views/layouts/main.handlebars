@@ -9,18 +9,46 @@
 	<link rel="stylesheet" href="../../style/style.css" class="sr">
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+
 	<title>News</title>
 
 </head>
 
 <style>
 	body {
-		background-color: antiquewhite;
+		background-color: black;
 	}
 </style>
 
 <body>
+	<nav>
+		<div class="nav-wrapper">
+			<a href="#" class="brand-logo center">Mongo Scraper</a>
+			<ul id="nav-mobile" class="left hide-on-med-and-down">
+				<li><a href="/savedArticles">Saved Articles</a></li>
+				<li><a id="scrape" action="/scrape">Initiate Scrape</a></li>
+			</ul>
+		</div>
+	</nav>
+
+	<img src="https://www.clicktechtips.com/wp-content/uploads/2017/04/best-news-apps-for-android-users.jpg">
+
 	{{{ body }}}
 </body>
 
 </html>
+
+<script>
+	$("#scrape").on("click", function () {
+		alert("Initiated");
+
+
+		$.getJSON("/articles", function (data) {
+
+		});
+	});
+
+
+</script>

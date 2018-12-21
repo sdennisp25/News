@@ -50,6 +50,7 @@ app.get("/scrape", function(req, res) {
         .attr("href");
 
       // Create a new Article using the `result` object built from scraping
+
       db.Article.create(result)
         .then(function(dbArticle) {
           // console.log(dbArticle);
@@ -93,22 +94,26 @@ app.get("/articles/:id", function(req, res) {
 });
 
 // =====================================================
-app.get("/notes", function(req, res) {
-	db.Article.find({})
-		.populate("notes")
-		.then(function(dbArticle){
-			res.json(dbArticle);
-		})
-		.catch(function(err){
-			res.json(err);
-		})
-})
+app.post("/add", function(req, res) {
+  db.Note.create(req.body)
+    .then(function(dbNote) {
+      return db.Article.findOneAndUpdate(
+        {},
+        { $push: { notes: dbNote._id } },
+        { new: true }
+      );
+    })
+    .then(function(dbArticle) {
+      res.json(dbArticle);
+    })
+    .catch(function(err) {
+      res.json(err);
+    });
+});
 
-app.post("/notes", function(req, res) {
-	db.Note.create(req.body)
-		.then(function(dbNote) {
-			return db.Article.findOneAndUpdate({}, { $push: {notes: dbNote._id } }, { new: true });
-		})
+app.get("/savedArticles", function(req, res) {
+  db.Article.findOne({})
+    .populate("note")
     .then(function(dbArticle) {
       res.json(dbArticle);
     })
