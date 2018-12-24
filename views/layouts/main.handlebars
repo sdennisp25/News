@@ -20,6 +20,27 @@
 	body {
 		background-color: black;
 	}
+
+	h1 {
+		position: absolute;
+		margin: 0 auto;
+		opacity: 0.7;
+		color: white;
+		left: 0;
+		top: 50%;
+		width: 100%;
+		text-align: center;
+	}
+
+	img {
+		width: 100%;
+		opacity: 0.6;
+		position: relative;
+	}
+
+	.nav-wrapper {
+		background-color: black;
+	}
 </style>
 
 <body>
@@ -27,28 +48,21 @@
 		<div class="nav-wrapper">
 			<a href="#" class="brand-logo center">Mongo Scraper</a>
 			<ul id="nav-mobile" class="left hide-on-med-and-down">
-				<li><a href="/savedArticles">Saved Articles</a></li>
-				<li><a id="scrape" action="/scrape">Initiate Scrape</a></li>
+				<li><a href="/Articles">| Home |</a></li>
+				<li><a href="/savedArticles">| Saved Articles |</a></li>
+				<li><a id="scrape" action="/scrape">| Initiate Scrape |</a></li>
 			</ul>
 		</div>
 	</nav>
 
-	<img src="https://www.clicktechtips.com/wp-content/uploads/2017/04/best-news-apps-for-android-users.jpg">
+
+	<div class="image">
+		<img src="https://www.clicktechtips.com/wp-content/uploads/2017/04/best-news-apps-for-android-users.jpg">
+		<h1>[  Mongo Scraper  ]</h1>
+	</div>
 
 	{{{ body }}}
+
 </body>
 
 </html>
-
-<script>
-	$("#scrape").on("click", function () {
-		alert("Initiated");
-
-
-		$.getJSON("/articles", function (data) {
-
-		});
-	});
-
-
-</script>

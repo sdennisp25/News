@@ -1,0 +1,64 @@
+<style>
+	h4 {
+		text-align: center;
+	}
+	.form-box {
+		height: 400px;
+		width: 450px;
+		padding: 15px;
+		background-color: grey;
+		border: 2px solid black;
+	}
+	.articleBox {
+		height: 400px;
+		width: 450px;
+		padding: 15px;
+		background-color: grey;
+		border: 2px solid black;
+	}
+	.commentBox {
+		height: 400px;
+		width: 450px;
+		padding: 15px;
+		background-color: grey;
+		border: 2px solid black;
+	}
+
+	.savedBox {
+		display: inline-flex;
+		padding: 10px;
+		margin-left: 2.5%;
+	}
+</style>
+
+<div class="savedBox">
+
+	<div class="form-box">
+		<h4>Enter a Comment!</h4>
+		<form action="/submit" method="post">
+			<input type="text" name="title" placeholder="Title">
+			<textarea type="text" name="body" placeholder="Write Note Here"></textarea>
+
+			<input type="submit">
+		</form>
+	</div>
+
+	<div class="commentBox">
+
+	</div>
+
+	<div class="articleBox">
+		<div class="row">
+			<div class="col s12 m12">
+				<div class="card-panel teal">
+					<span class="white-text">
+						<a id="add" action="/add" method="post">{{title}}<i type="add" data-id="{{id}}" class="material-icons new badge right green">check</i>Add</a>
+					</span>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+
+</div>

@@ -9,7 +9,13 @@ var db = require("./models");
 var app = express();
 var PORT = process.env.PORT || 8080; //PORT set by Heroku
 
-app.engine("handlebars", exphbs({ defaultLayout: "main" }));
+app.engine(
+  "handlebars",
+  exphbs({
+    defaultLayout: "main"
+    // partialsDir: path.join(__dirname, "views/partials")
+  })
+);
 app.set("view engine", "handlebars");
 
 // =====================================================
@@ -112,10 +118,18 @@ app.post("/add", function(req, res) {
 });
 
 app.get("/savedArticles", function(req, res) {
-  db.Article.findOne({})
+	// db.SavedArticle.create({})
+	// .then(function(dbArticle) {
+	// 	console.log(dbArticle);
+	// })
+	// .catch(function(err) {
+	// 	console.log(err);
+	// });
+
+  db.Article.find({})
     .populate("note")
     .then(function(dbArticle) {
-      res.json(dbArticle);
+      res.render("saved", { saved: dbArticle });
     })
     .catch(function(err) {
       res.json(err);
